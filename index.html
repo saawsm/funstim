@@ -120,6 +120,59 @@
     document.getElementById('file-input').value = "";
   }
   
+  function loadSettings() {
+    removeChangeListeners();
+
+    if (!window.localStorage.getItem("frequency")) updateSettings();
+
+    document.getElementById("fade").value = window.localStorage.getItem("fade");
+    document.getElementById("frequency").value = window.localStorage.getItem("frequency");
+    document.getElementById("sampleRate").value = window.localStorage.getItem("sampleRate");
+
+    document.getElementById("polarity").checked = window.localStorage.getItem("polarity") === "true";
+    document.getElementById("doubletime").checked = window.localStorage.getItem("doubletime") === "true";
+    document.getElementById("fullrange").checked = window.localStorage.getItem("fullrange") === "true";
+    document.getElementById("fadeonpause").checked = window.localStorage.getItem("fadeonpause") === "true";
+
+    addChangeListeners();
+  }
+
+  function updateSettings(e) {
+    console.log("Saving settings...");
+    window.localStorage.clear();
+
+    window.localStorage.setItem("fade", document.getElementById("fade").value);
+    window.localStorage.setItem("frequency", document.getElementById("frequency").value);
+    window.localStorage.setItem("sampleRate", document.getElementById("sampleRate").value);
+
+    window.localStorage.setItem("polarity", document.getElementById("polarity").checked);
+    window.localStorage.setItem("doubletime", document.getElementById("doubletime").checked);
+    window.localStorage.setItem("fullrange", document.getElementById("fullrange").checked);
+    window.localStorage.setItem("fadeonpause", document.getElementById("fadeonpause").checked);
+  }
+
+  function addChangeListeners() {
+    document.getElementById("fade").addEventListener("change", updateSettings, false);
+    document.getElementById("frequency").addEventListener("change", updateSettings, false);
+    document.getElementById("sampleRate").addEventListener("change", updateSettings, false);
+
+    document.getElementById("doubletime").addEventListener("change", updateSettings, false);
+    document.getElementById("polarity").addEventListener("change", updateSettings, false);
+    document.getElementById("fullrange").addEventListener("change", updateSettings, false);
+    document.getElementById("fadeonpause").addEventListener("change", updateSettings, false);
+  }
+
+  function removeChangeListeners() {
+    document.getElementById("fade").removeEventListener("change", updateSettings, false);
+    document.getElementById("frequency").removeEventListener("change", updateSettings, false);
+    document.getElementById("sampleRate").addEventListener("change", updateSettings, false);
+
+    document.getElementById("doubletime").addEventListener("change", updateSettings, false);
+    document.getElementById("polarity").addEventListener("change", updateSettings, false);
+    document.getElementById("fullrange").addEventListener("change", updateSettings, false);
+    document.getElementById("fadeonpause").addEventListener("change", updateSettings, false);
+  }
+  
   document.getElementById('file-input').addEventListener('change', readFiles, false);
 
   function download(filename, text) {
@@ -131,4 +184,6 @@
     link.click();
     document.body.removeChild(link);
   }
+    
+  loadSettings();
 </script>
