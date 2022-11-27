@@ -2,6 +2,10 @@
   <h1>Convert funscript to phase modulated MP3</h1>
   <hr>
   <h3>Settings</h3>
+  <hr>
+  <a class="form-text" href="#link" id="link">Share Link</a>
+  <small class="form-text text-muted">Append "&update" on the URL to save settings as default.</small>
+  <hr>
   <div class="row">
     <div class="form col-6">
       <div class="form-group">
@@ -128,14 +132,23 @@
 
     if (!window.localStorage.getItem("frequency")) updateSettings();
 
-    document.getElementById("fade").value = window.localStorage.getItem("fade");
-    document.getElementById("frequency").value = window.localStorage.getItem("frequency");
-    document.getElementById("sampleRate").value = window.localStorage.getItem("sampleRate");
+    const urlParams = new URLSearchParams(window.location.search);
 
-    document.getElementById("polarity").checked = window.localStorage.getItem("polarity") === "true";
-    document.getElementById("doubletime").checked = window.localStorage.getItem("doubletime") === "true";
-    document.getElementById("fullrange").checked = window.localStorage.getItem("fullrange") === "true";
-    document.getElementById("fadeonpause").checked = window.localStorage.getItem("fadeonpause") === "true";
+    document.getElementById("fade").value = urlParams.has("fade") ? urlParams.get("fade") : window.localStorage.getItem("fade");
+    document.getElementById("frequency").value = urlParams.has("frequency") ? urlParams.get("frequency") :  window.localStorage.getItem("frequency");
+    document.getElementById("sampleRate").value = urlParams.has("sampleRate") ? urlParams.get("sampleRate") : window.localStorage.getItem("sampleRate");
+
+    document.getElementById("polarity").checked = urlParams.has("polarity") ? urlParams.get("polarity") === '1' :  window.localStorage.getItem("polarity") === "true";
+    document.getElementById("doubletime").checked = urlParams.has("doubletime") ? urlParams.get("doubletime") === '1' :  window.localStorage.getItem("doubletime") === "true";
+    document.getElementById("fullrange").checked = urlParams.has("fullrange") ? urlParams.get("fullrange") === '1' : window.localStorage.getItem("fullrange") === "true";
+    document.getElementById("fadeonpause").checked = urlParams.has("fadeonpause") ? urlParams.get("fadeonpause") === '1' : window.localStorage.getItem("fadeonpause") === "true";
+    
+    if(urlParams.has("update")) {
+        updateSettings();
+        urlParams.delete("update");
+
+        window.location.search = "";
+    }
 
     addChangeListeners();
   }
@@ -152,6 +165,8 @@
     window.localStorage.setItem("doubletime", document.getElementById("doubletime").checked);
     window.localStorage.setItem("fullrange", document.getElementById("fullrange").checked);
     window.localStorage.setItem("fadeonpause", document.getElementById("fadeonpause").checked);
+
+    updateShareLink();
   }
 
   function addChangeListeners() {
@@ -175,8 +190,34 @@
     document.getElementById("fullrange").addEventListener("change", updateSettings, false);
     document.getElementById("fadeonpause").addEventListener("change", updateSettings, false);
   }
+
+  function updateShareLink() {
+    const urlParams = new URLSearchParams();
+
+    urlParams.set("fade", document.getElementById("fade").value);
+    urlParams.set("frequency", document.getElementById("frequency").value);
+    urlParams.set("sampleRate", document.getElementById("sampleRate").value);
+
+    urlParams.set("polarity", document.getElementById("polarity").checked ? "1" : "0");
+    urlParams.set("doubletime", document.getElementById("doubletime").checked ? "1" : "0");
+    urlParams.set("fullrange", document.getElementById("fullrange").checked ? "1" : "0");
+    urlParams.set("fadeonpause", document.getElementById("fadeonpause").checked ? "1" : "0");
   
+    document.getElementById("link").href = window.location.href.split('?')[0] + "?" + urlParams.toString();
+  }
+  
+  function copyLink(e) {
+    e.preventDefault();
+
+    navigator.clipboard.writeText(document.getElementById("link").href);
+
+    let row = document.createElement('div');
+    updateRow(row, "Link Copied.", "primary", true);
+    progress.appendChild(row);
+  }
+
   document.getElementById('file-input').addEventListener('change', readFiles, false);
+  document.getElementById("link").addEventListener('click', copyLink, false);
 
   function download(filename, text) {
     let blob = new Blob(text, { type: "audio/mp3" });
@@ -187,6 +228,7 @@
     link.click();
     document.body.removeChild(link);
   }
-    
+
   loadSettings();
+  updateShareLink();
 </script>
